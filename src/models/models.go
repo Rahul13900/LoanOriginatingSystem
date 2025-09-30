@@ -1,7 +1,7 @@
 package models
 
 import (
-	"los/src/api/constants"
+	"los/src/constants"
 	"time"
 )
 

@@ -3,8 +3,8 @@ package loan
 import (
 	"context"
 	"errors"
-	"los/src/api/constants"
-	"los/src/api/models"
+	"los/src/constants"
+	"los/src/models"
 )
 
 type LoanService interface {
