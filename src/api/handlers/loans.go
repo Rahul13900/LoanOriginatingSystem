@@ -20,6 +20,9 @@ func RegisterLoanRoutes(r *gin.Engine, h *LoansHandler) {
 	v1 := r.Group("/api/v1")
 	v1.POST("/loans", h.createLoan)
 	v1.GET("/loans", h.listLoans)
+	v1.GET("/loans/status-count", h.statusCount)
+	v1.GET("/customers/top", h.topCustomers)
+	v1.PUT("/agents/:agent_id/loans/:loan_id/decision", h.agentDecision)
 }
 
 func (h *LoansHandler) createLoan(c *gin.Context) {
@@ -66,4 +69,38 @@ func (h *LoansHandler) listLoans(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, items)
+}
+
+func (h *LoansHandler) agentDecision(c *gin.Context) {
+	agentID := c.Param("agent_id")
+	loanID := c.Param("loan_id")
+	var req models.AgentDecisionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.String(http.StatusBadRequest, "invalid json")
+		return
+	}
+	approve := req.Decision == "APPROVE"
+	if err := h.svc.AgentDecision(c.Request.Context(), agentID, loanID, approve); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "updated"})
+}
+
+func (h *LoansHandler) statusCount(c *gin.Context) {
+	m, err := h.svc.StatusCounts(c.Request.Context())
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, m)
+}
+
+func (h *LoansHandler) topCustomers(c *gin.Context) {
+	list, err := h.svc.TopCustomers(c.Request.Context(), 3)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, list)
 }
