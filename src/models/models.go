@@ -17,7 +17,7 @@ type CreateLoanResponse struct {
 	Status string `json:"status"`
 }
 
-type AgentDecision struct {
+type AgentDecisionRequest struct {
 	Decision string `json:"decision"`
 }
 

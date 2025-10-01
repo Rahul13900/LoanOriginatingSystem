@@ -9,13 +9,20 @@ import (
 
 type LoanService interface {
 	CreateLoan(ctx context.Context, req *models.Loan) (string, error)
-	ListByStatus(ctx context.Context, status constants.Status, limit, offset int) ([]*models.Loan, error)
+	ListByStatus(ctx context.Context, status constants.Status, limit, offset int) ([]models.Loan, error)
 	GetLoanByID(ctx context.Context, loanID string) (*models.Loan, error)
+	StatusCounts(ctx context.Context) (map[constants.Status]int64, error)
+	TopCustomers(ctx context.Context, limit int) ([]struct {
+		Customer string
+		Total    int64
+	}, error)
 }
 
 type AgentService interface {
 	AssignLoanToAgent(ctx context.Context, loanID string, agentID string) error
 	IsAssigned(ctx context.Context, agentID, loanID string) (bool, error)
+	PickAvailable(ctx context.Context) (string, error)
+	ManagerOf(ctx context.Context, agentID string) (string, error)
 }
 
 type Service struct {
@@ -35,12 +42,23 @@ func (s *Service) CreateLoan(ctx context.Context, req *models.Loan) (string, err
 	return s.LoanService.CreateLoan(ctx, req)
 }
 
-func (s *Service) ListByStatus(ctx context.Context, status constants.Status, limit, offset int) ([]*models.Loan, error) {
+func (s *Service) ListByStatus(ctx context.Context, status constants.Status, limit, offset int) ([]models.Loan, error) {
 	return s.LoanService.ListByStatus(ctx, status, limit, offset)
 }
 
 func (s *Service) GetLoanByID(ctx context.Context, loanID string) (*models.Loan, error) {
 	return s.LoanService.GetLoanByID(ctx, loanID)
+}
+
+func (s *Service) StatusCounts(ctx context.Context) (map[constants.Status]int64, error) {
+	return s.LoanService.StatusCounts(ctx)
+}
+
+func (s *Service) TopCustomers(ctx context.Context, n int) ([]struct {
+	Customer string
+	Total    int64
+}, error) {
+	return s.LoanService.TopCustomers(ctx, n)
 }
 
 func (s *Service) AgentDecision(ctx context.Context, agentID, loanID string, approve bool) error {
