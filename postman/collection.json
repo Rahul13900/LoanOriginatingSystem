@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "Loan Service API",
+    "_postman_id": "d1f6f6bb-7b5b-4c0a-9d9a-000000000001",
+    "description": "Endpoints for health, loans CRUD-like flows, counts, top customers, and agent decisions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.expect(json.status).to.eql(\"ok\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Loan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customer_name\": \"Alice Doe\",\n  \"phone\": \"+15555550123\",\n  \"amount\": 1200.50,\n  \"type\": \"PERSONAL\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/loans"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"201 Created\", () => pm.response.code === 201);",
+              "const json = pm.response.json();",
+              "pm.expect(json).to.have.property(\"loan_id\");",
+              "pm.environment.set(\"loanId\", json.loan_id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Loans",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/loans?status=&page=1&size=10"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.expect(Array.isArray(json)).to.eql(true);",
+              "if (json.length > 0 && json[0].loan_id) { pm.environment.set(\"loanId\", json[0].loan_id); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loan Status Counts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/loans/status-count"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.expect(typeof json).to.eql(\"object\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Top Customers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/top"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.expect(Array.isArray(json)).to.eql(true);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent Decision — Approve",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"APPROVE\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agents/{{agentId}}/loans/{{loanId}}/decision"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.expect(json.status).to.eql(\"updated\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent Decision — Reject",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"REJECT\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agents/{{agentId}}/loans/{{loanId}}/decision"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"200 OK\", () => pm.response.code === 200);",
+              "const json = pm.response.json();",
+              "pm.expect(json.status).to.eql(\"updated\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
